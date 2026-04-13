@@ -4,7 +4,30 @@ Base URL: `/api/v1`
 
 Два способа авторизации — см. [requirements.md](requirements.md#api-authentication).
 
-Cursor-based пагинация: `?cursor=` в запросе, `next_cursor` в ответе (null если страниц больше нет).
+Cursor-based пагинация: `?cursor=` в запросе, `next_cursor` в ответе (null если страниц больше нет). См. подробнее в [requirements.md](requirements.md#cursor-based-pagination).
+
+## Error format
+
+Все ошибки возвращаются в едином формате:
+
+```json
+{
+  "error": {
+    "code": "PERMISSION_DENIED",
+    "message": "You don't have permission to edit this task"
+  }
+}
+```
+
+| HTTP | code | Когда |
+|---|---|---|
+| 400 | `VALIDATION_ERROR` | Невалидные поля запроса |
+| 401 | `UNAUTHORIZED` | Отсутствует или невалидный токен |
+| 403 | `PERMISSION_DENIED` | Нет прав на действие |
+| 404 | `NOT_FOUND` | Ресурс не найден |
+| 409 | `CONFLICT` | Конфликт (например, цикл в цепочке блокировок) |
+
+---
 
 ---
 
