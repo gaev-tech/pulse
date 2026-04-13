@@ -255,24 +255,12 @@ CREATE TABLE filters (
     owner_type       TEXT NOT NULL,
     owner_id         UUID NOT NULL,
     name             TEXT NOT NULL,
-    author_id        UUID REFERENCES users(id),
-    assignee_id      UUID REFERENCES users(id),
-    title_contains   TEXT,
-    key_contains     TEXT,
-    desc_contains    TEXT,
+    filter_mode      TEXT NOT NULL DEFAULT 'simple',
+    search_contains  TEXT,
+    assignee_ids     UUID[],
     status           TEXT,
     label_ids        UUID[],
-    updated_after    TIMESTAMPTZ,
-    updated_before   TIMESTAMPTZ,
-    created_after    TIMESTAMPTZ,
-    created_before   TIMESTAMPTZ,
-    has_links        BOOLEAN,
-    has_relation     BOOLEAN,
-    relation_task_id UUID REFERENCES tasks(id),
-    has_blocking     BOOLEAN,
-    blocking_task_id UUID REFERENCES tasks(id),
-    parent_task_id   UUID REFERENCES tasks(id),
-    attachment_name  TEXT,
+    rsql             TEXT,
     team_id          UUID REFERENCES teams(id),
     created_by       UUID NOT NULL REFERENCES users(id),
     created_at       TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -282,7 +270,11 @@ CREATE TABLE filters (
 CREATE INDEX ON filters (owner_type, owner_id);
 ```
 
-`team_id` — только для личных фильтров, ограничивает выборку задачами конкретной команды.
+- `filter_mode` — `simple` или `rsql`; определяет какие поля критериев применяются
+- `search_contains` — поиск по ключу, названию и описанию (contains); только в simple mode
+- `assignee_ids`, `status`, `label_ids` — только в simple mode
+- `rsql` — RSQL-выражение; только в rsql mode
+- `team_id` — только для личных фильтров, только в simple mode (AND к основным критериям); в rsql mode выражается внутри RSQL-выражения
 
 ---
 

@@ -234,14 +234,14 @@ GET /api/v1/filters
   — Navigation Sidebar: личные фильтры + команды с их фильтрами
 
 POST /api/v1/filters
-  Body: { name, owner_type, owner_id, author_id?, assignee_id?, title_contains?,
-          key_contains?, desc_contains?, status?, label_ids?,
-          — null = не фильтровать; [] = задачи без меток; [id,...] = задачи с любой из меток
-          updated_after?,
-          updated_before?, created_after?, created_before?, has_links?,
-          has_relation?, relation_task_key?, has_blocking?, blocking_task_key?,
-          parent_task_key?, attachment_name?, team_id? }
-  Response: { id, name, owner_type, owner_id, ...criteria fields }
+  Body: { name, owner_type, owner_id, filter_mode,
+          — simple mode:
+          search_contains?, assignee_ids?, status?, label_ids?,
+          — rsql mode:
+          rsql?,
+          — только simple mode, только для личных фильтров:
+          team_id? }
+  Response: { id, name, owner_type, owner_id, filter_mode, ...criteria fields }
   Auth: JWT / PAT
   — Filter Create Modal
 
@@ -251,14 +251,14 @@ GET /api/v1/filters/{filterID}
   — Filter Results Screen: загрузка критериев при открытии фильтра
 
 PATCH /api/v1/filters/{filterID}
-  Body: { name?, author_id?, assignee_id?, title_contains?, key_contains?,
-          desc_contains?, status?, label_ids?,
-          — null = не фильтровать; [] = задачи без меток; [id,...] = задачи с любой из меток
-          updated_after?, updated_before?,
-          created_after?, created_before?, has_links?, has_relation?, relation_task_key?,
-          has_blocking?, blocking_task_key?, parent_task_key?,
-          attachment_name?, team_id? }
-  Response: { id, name, owner_type, owner_id, ...criteria fields }
+  Body: { name?, filter_mode?,
+          — simple mode:
+          search_contains?, assignee_ids?, status?, label_ids?,
+          — rsql mode:
+          rsql?,
+          — только simple mode, только для личных фильтров:
+          team_id? }
+  Response: { id, name, owner_type, owner_id, filter_mode, ...criteria fields }
   Auth: JWT / PAT
   — Filter Results Screen: сохранение изменённых критериев
 
