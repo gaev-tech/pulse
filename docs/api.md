@@ -95,9 +95,9 @@ DELETE /api/v1/teams/{prefix}
   — Team Edit Modal: удаление команды
 
 GET /api/v1/teams/{prefix}/members
-  Response: [{ user: { id, email, username }, joined_at }]
+  Response: [{ user: { id, email, username }, permissions: number, joined_at }]
   Auth: JWT / PAT
-  — Team Edit Modal: список участников
+  — Team Edit Modal: список участников с их правами
 
 POST /api/v1/teams/{prefix}/members
   Body: { email, permissions: ["edit.title", "team.manage_filters", ...] }
@@ -110,7 +110,8 @@ PATCH /api/v1/teams/{prefix}/members/{userID}/permissions
   Body: { permissions: ["edit.title", "team.manage_filters", ...] }
   Response: 204 No Content
   Auth: JWT / PAT
-  — Team Edit Modal: замена прав участника; минимум одно валидное право
+  — Team Edit Modal: замена прав участника; право `view` выдаётся автоматически;
+    permissions может быть пустым массивом
 
 DELETE /api/v1/teams/{prefix}/members/{userID}
   Response: 204 No Content
@@ -237,8 +238,8 @@ POST /api/v1/filters
           key_contains?, desc_contains?, status?, label_ids?,
           — null = не фильтровать; [] = задачи без меток; [id,...] = задачи с любой из меток
           updated_after?,
-          updated_before?, created_after?, created_before?, has_relation?,
-          relation_task_key?, has_blocking?, blocking_task_key?,
+          updated_before?, created_after?, created_before?, has_links?,
+          has_relation?, relation_task_key?, has_blocking?, blocking_task_key?,
           parent_task_key?, attachment_name?, team_id? }
   Response: { id, name, owner_type, owner_id, ...criteria fields }
   Auth: JWT / PAT
@@ -254,7 +255,7 @@ PATCH /api/v1/filters/{filterID}
           desc_contains?, status?, label_ids?,
           — null = не фильтровать; [] = задачи без меток; [id,...] = задачи с любой из меток
           updated_after?, updated_before?,
-          created_after?, created_before?, has_relation?, relation_task_key?,
+          created_after?, created_before?, has_links?, has_relation?, relation_task_key?,
           has_blocking?, blocking_task_key?, parent_task_key?,
           attachment_name?, team_id? }
   Response: { id, name, owner_type, owner_id, ...criteria fields }

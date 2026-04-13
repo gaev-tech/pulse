@@ -266,6 +266,7 @@ CREATE TABLE filters (
     updated_before   TIMESTAMPTZ,
     created_after    TIMESTAMPTZ,
     created_before   TIMESTAMPTZ,
+    has_links        BOOLEAN,
     has_relation     BOOLEAN,
     relation_task_id UUID REFERENCES tasks(id),
     has_blocking     BOOLEAN,
