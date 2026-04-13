@@ -68,9 +68,15 @@ POST /api/v1/teams
   — Team Create Modal
 
 GET /api/v1/teams
-  Response: [{ id, name, prefix, owner_id, created_at }]
+  Response: [{ id, name, prefix, owner_id, team_permissions: number, created_at }]
   Auth: JWT / PAT
   — команды, в которых состоит текущий пользователь
+
+GET /api/v1/teams-for-create-task
+  Response: [{ id, name, prefix }]
+  Auth: JWT / PAT
+  — команды, в которых пользователь имеет право `task.create`;
+    используется в Task Create Modal
 
 GET /api/v1/teams/{prefix}
   Response: { id, name, prefix, owner_id, team_permissions: number, created_at }
@@ -97,7 +103,8 @@ POST /api/v1/teams/{prefix}/members
   Body: { email, permissions: ["edit.title", "team.manage_filters", ...] }
   Response: 201 Created
   Auth: JWT / PAT
-  — Team Edit Modal: приглашение пользователя с выдачей прав; минимум одно валидное право
+  — Team Edit Modal: приглашение пользователя; право `view` выдаётся автоматически;
+    permissions может быть пустым массивом
 
 PATCH /api/v1/teams/{prefix}/members/{userID}/permissions
   Body: { permissions: ["edit.title", "team.manage_filters", ...] }
@@ -118,10 +125,11 @@ DELETE /api/v1/teams/{prefix}/members/{userID}
 
 ```
 POST /api/v1/tasks/{key}/permissions
-  Body: { user_id, permissions: ["view", "edit.title", "share", ...] }
+  Body: { user_id, permissions: ["edit.title", "share", ...] }
   Response: { permission_id }
   Auth: JWT / PAT
-  — шаринг задачи: выдача прав пользователю; минимум одно валидное право
+  — шаринг задачи: выдача прав пользователю; право `view` выдаётся автоматически;
+    permissions может быть пустым массивом
 
 DELETE /api/v1/tasks/{key}/permissions/{permissionID}
   Response: 204 No Content
@@ -226,7 +234,9 @@ GET /api/v1/filters
 
 POST /api/v1/filters
   Body: { name, owner_type, owner_id, author_id?, assignee_id?, title_contains?,
-          key_contains?, desc_contains?, status?, label_ids?, updated_after?,
+          key_contains?, desc_contains?, status?, label_ids?,
+          — null = не фильтровать; [] = задачи без меток; [id,...] = задачи с любой из меток
+          updated_after?,
           updated_before?, created_after?, created_before?, has_relation?,
           relation_task_key?, has_blocking?, blocking_task_key?,
           parent_task_key?, attachment_name?, team_id? }
@@ -241,7 +251,9 @@ GET /api/v1/filters/{filterID}
 
 PATCH /api/v1/filters/{filterID}
   Body: { name?, author_id?, assignee_id?, title_contains?, key_contains?,
-          desc_contains?, status?, label_ids?, updated_after?, updated_before?,
+          desc_contains?, status?, label_ids?,
+          — null = не фильтровать; [] = задачи без меток; [id,...] = задачи с любой из меток
+          updated_after?, updated_before?,
           created_after?, created_before?, has_relation?, relation_task_key?,
           has_blocking?, blocking_task_key?, parent_task_key?,
           attachment_name?, team_id? }

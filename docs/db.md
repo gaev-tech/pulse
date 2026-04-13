@@ -261,6 +261,7 @@ CREATE TABLE filters (
     key_contains     TEXT,
     desc_contains    TEXT,
     status           TEXT,
+    label_ids        UUID[],
     updated_after    TIMESTAMPTZ,
     updated_before   TIMESTAMPTZ,
     created_after    TIMESTAMPTZ,

@@ -120,7 +120,8 @@ Payload:
 // filter.task_entered, filter.task_left
 {
   "filter": { "id", "name", "owner_type", "owner_id" },
-  "task": { "id", "key", "title", "status", "owner_type", "owner_id" }
+  "task": { "id", "key", "title", "status", "owner_type", "owner_id" },
+  "actor": { "id", "email", "username" }
 }
 ```
 
