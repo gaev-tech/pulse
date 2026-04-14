@@ -1,4 +1,4 @@
-package magic_link
+package magiclink
 
 import (
 	"context"
@@ -12,10 +12,14 @@ import (
 	domain "github.com/gaevivan/pulse/internal/domain/user"
 )
 
+var _ domain.MagicLinkRepository = (*Repo)(nil)
+
+// Repo is the PostgreSQL implementation of domain.MagicLinkRepository.
 type Repo struct {
 	pool *pgxpool.Pool
 }
 
+// New creates a new magic link Repo.
 func New(pool *pgxpool.Pool) *Repo {
 	return &Repo{pool: pool}
 }

@@ -11,10 +11,12 @@ import (
 	"github.com/gaevivan/pulse/pkg/validator"
 )
 
+// AuthHandler handles authentication endpoints.
 type AuthHandler struct {
 	usecase *userusecase.UseCase
 }
 
+// NewAuthHandler creates a new AuthHandler.
 func NewAuthHandler(usecase *userusecase.UseCase) *AuthHandler {
 	return &AuthHandler{usecase: usecase}
 }
@@ -179,7 +181,7 @@ func (handler *AuthHandler) Logout(writer http.ResponseWriter, request *http.Req
 		return
 	}
 
-	// Silently succeed even for invalid/revoked tokens
+	// Silently succeed even for invalid/revoked tokens.
 	_ = handler.usecase.Logout(request.Context(), body.RefreshToken)
 	writer.WriteHeader(http.StatusNoContent)
 }

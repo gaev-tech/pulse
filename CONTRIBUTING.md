@@ -23,6 +23,24 @@ closes #11
 closes #10
 ```
 
+## Именование переменных и аргументов (Go)
+
+Не использовать однобуквенные или сокращённые имена переменных, аргументов и receiver-ов. Имена должны быть полными и осмысленными.
+
+```go
+// Плохо
+func (h *AuthHandler) Me(w http.ResponseWriter, r *http.Request) { ... }
+func (r *Repo) GetByEmail(ctx context.Context, email string) { ... }
+func (m *Manager) GenerateAccessToken(userID string) { ... }
+
+// Хорошо
+func (handler *AuthHandler) Me(writer http.ResponseWriter, request *http.Request) { ... }
+func (repo *Repo) GetByEmail(ctx context.Context, email string) { ... }
+func (manager *Manager) GenerateAccessToken(userID string) { ... }
+```
+
+Это касается любого Go-кода: handler-ов, middleware, репозиториев, usecase-ов, инфраструктурных компонентов.
+
 ## API-типы (frontend)
 
 Zod-схемы и типизированный API-клиент генерируются из OpenAPI-схемы бэкенда (`openapi-zod-client`).

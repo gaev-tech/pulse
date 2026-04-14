@@ -14,22 +14,27 @@ import (
 
 type contextKey string
 
+// UserIDKey is the context key for the authenticated user ID.
 const UserIDKey contextKey = "user_id"
 
+// UserIDFromContext returns the authenticated user ID from ctx.
 func UserIDFromContext(ctx context.Context) (string, bool) {
 	userID, ok := ctx.Value(UserIDKey).(string)
 	return userID, ok && userID != ""
 }
 
+// Auth is HTTP middleware for JWT and PAT authentication.
 type Auth struct {
 	jwt  *jwt.Manager
 	pats user.PATRepository
 }
 
+// NewAuth creates a new Auth middleware.
 func NewAuth(jwtManager *jwt.Manager, pats user.PATRepository) *Auth {
 	return &Auth{jwt: jwtManager, pats: pats}
 }
 
+// Required enforces authentication, returning 401 if no valid credential is present.
 func (auth *Auth) Required(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		userID, err := auth.resolveUserID(request)

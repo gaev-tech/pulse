@@ -1,4 +1,4 @@
-package refresh_token
+package refreshtoken
 
 import (
 	"context"
@@ -12,10 +12,14 @@ import (
 	domain "github.com/gaevivan/pulse/internal/domain/user"
 )
 
+var _ domain.RefreshTokenRepository = (*Repo)(nil)
+
+// Repo is the PostgreSQL implementation of domain.RefreshTokenRepository.
 type Repo struct {
 	pool *pgxpool.Pool
 }
 
+// New creates a new refresh token Repo.
 func New(pool *pgxpool.Pool) *Repo {
 	return &Repo{pool: pool}
 }

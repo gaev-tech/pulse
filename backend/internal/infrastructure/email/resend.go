@@ -8,16 +8,19 @@ import (
 	"net/http"
 )
 
+// Sender sends transactional email.
 type Sender interface {
 	SendMagicLink(ctx context.Context, toEmail, link string) error
 }
 
+// ResendClient sends email via the Resend API.
 type ResendClient struct {
 	apiKey    string
 	fromEmail string
 	client    *http.Client
 }
 
+// NewResend creates a new ResendClient.
 func NewResend(apiKey, fromEmail string) *ResendClient {
 	return &ResendClient{
 		apiKey:    apiKey,
@@ -27,15 +30,16 @@ func NewResend(apiKey, fromEmail string) *ResendClient {
 }
 
 type resendRequest struct {
-	From    string `json:"from"`
+	From    string   `json:"from"`
 	To      []string `json:"to"`
-	Subject string `json:"subject"`
-	HTML    string `json:"html"`
+	Subject string   `json:"subject"`
+	HTML    string   `json:"html"`
 }
 
-func (resend *ResendClient) SendMagicLink(ctx context.Context, toEmail, link string) error {
+// SendMagicLink sends a magic link email via Resend.
+func (client *ResendClient) SendMagicLink(ctx context.Context, toEmail, link string) error {
 	body := resendRequest{
-		From:    resend.fromEmail,
+		From:    client.fromEmail,
 		To:      []string{toEmail},
 		Subject: "Your Pulse login link",
 		HTML:    fmt.Sprintf(`<p>Click <a href="%s">here</a> to log in to Pulse. Link expires in 15 minutes.</p>`, link),
@@ -50,10 +54,10 @@ func (resend *ResendClient) SendMagicLink(ctx context.Context, toEmail, link str
 	if err != nil {
 		return fmt.Errorf("new request: %w", err)
 	}
-	req.Header.Set("Authorization", "Bearer "+resend.apiKey)
+	req.Header.Set("Authorization", "Bearer "+client.apiKey)
 	req.Header.Set("Content-Type", "application/json")
 
-	resp, err := resend.client.Do(req)
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return fmt.Errorf("do request: %w", err)
 	}

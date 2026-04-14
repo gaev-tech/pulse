@@ -17,8 +17,9 @@ import (
 )
 
 const (
-	magicLinkTTL    = 15 * time.Minute
-	refreshTokenTTL = 30 * 24 * time.Hour
+	magicLinkTTL        = 15 * time.Minute
+	refreshTokenTTL     = 30 * 24 * time.Hour
+	maxUsernameAttempts = 10
 )
 
 var (
@@ -31,6 +32,7 @@ var (
 	ErrUserNotFound          = errors.New("user not found")
 )
 
+// UseCase implements auth business logic.
 type UseCase struct {
 	users         user.Repository
 	magicLinks    user.MagicLinkRepository
@@ -40,6 +42,7 @@ type UseCase struct {
 	frontendURL   string
 }
 
+// New creates a new UseCase.
 func New(
 	users user.Repository,
 	magicLinks user.MagicLinkRepository,
@@ -58,39 +61,42 @@ func New(
 	}
 }
 
-func (useCase *UseCase) SendMagicLink(ctx context.Context, emailAddr string) error {
+// SendMagicLink generates a magic link and emails it to the given address.
+func (usecase *UseCase) SendMagicLink(ctx context.Context, emailAddr string) error {
 	rawToken, err := generateToken()
 	if err != nil {
-		return fmt.Errorf("generate token: %w", errors.Join(ErrTokenGenerationFailed, err))
+		return errors.Join(ErrTokenGenerationFailed, fmt.Errorf("generate token: %w", err))
 	}
 
 	tokenHash := hashToken(rawToken)
 	expiresAt := time.Now().Add(magicLinkTTL)
 
-	if err := useCase.magicLinks.Create(ctx, emailAddr, tokenHash, expiresAt); err != nil {
-		return fmt.Errorf("create magic link: %w", errors.Join(ErrDatabaseUnavailable, err))
+	if err := usecase.magicLinks.Create(ctx, emailAddr, tokenHash, expiresAt); err != nil {
+		return errors.Join(ErrDatabaseUnavailable, fmt.Errorf("create magic link: %w", err))
 	}
 
-	link := fmt.Sprintf("%s/auth/verify?token=%s", useCase.frontendURL, rawToken)
-	if err := useCase.email.SendMagicLink(ctx, emailAddr, link); err != nil {
-		return fmt.Errorf("send email: %w", errors.Join(ErrEmailUnavailable, err))
+	link := fmt.Sprintf("%s/auth/verify?token=%s", usecase.frontendURL, rawToken)
+	if err := usecase.email.SendMagicLink(ctx, emailAddr, link); err != nil {
+		return errors.Join(ErrEmailUnavailable, fmt.Errorf("send email: %w", err))
 	}
 
 	return nil
 }
 
+// VerifyResult holds the tokens and user returned after successful magic-link verification.
 type VerifyResult struct {
 	AccessToken  string
 	RefreshToken string
 	User         *user.User
 }
 
-func (useCase *UseCase) VerifyMagicLink(ctx context.Context, rawToken string) (*VerifyResult, error) {
+// VerifyMagicLink validates the raw token and returns a token pair and the user.
+func (usecase *UseCase) VerifyMagicLink(ctx context.Context, rawToken string) (*VerifyResult, error) {
 	tokenHash := hashToken(rawToken)
 
-	magicToken, err := useCase.magicLinks.GetByHash(ctx, tokenHash)
+	magicToken, err := usecase.magicLinks.GetByHash(ctx, tokenHash)
 	if err != nil {
-		return nil, fmt.Errorf("get magic link: %w", errors.Join(ErrDatabaseUnavailable, err))
+		return nil, errors.Join(ErrDatabaseUnavailable, fmt.Errorf("get magic link: %w", err))
 	}
 	if magicToken == nil {
 		return nil, ErrInvalidToken
@@ -102,38 +108,37 @@ func (useCase *UseCase) VerifyMagicLink(ctx context.Context, rawToken string) (*
 		return nil, ErrInvalidToken
 	}
 
-	existingUser, err := useCase.users.GetByEmail(ctx, magicToken.Email)
+	existingUser, err := usecase.users.GetByEmail(ctx, magicToken.Email)
 	if err != nil {
-		return nil, fmt.Errorf("get user: %w", errors.Join(ErrDatabaseUnavailable, err))
+		return nil, errors.Join(ErrDatabaseUnavailable, fmt.Errorf("get user: %w", err))
 	}
 
-	var currentUser *user.User
-	if existingUser != nil {
-		currentUser = existingUser
-	} else {
-		username, err := useCase.generateUsername(ctx, magicToken.Email)
+	currentUser := existingUser
+	if currentUser == nil {
+		username, err := usecase.generateUsername(ctx, magicToken.Email)
 		if err != nil {
 			return nil, fmt.Errorf("generate username: %w", err)
 		}
-		currentUser, err = useCase.users.Create(ctx, magicToken.Email, username)
+		currentUser, err = usecase.users.Create(ctx, magicToken.Email, username)
 		if err != nil {
-			return nil, fmt.Errorf("create user: %w", errors.Join(ErrDatabaseUnavailable, err))
+			return nil, errors.Join(ErrDatabaseUnavailable, fmt.Errorf("create user: %w", err))
 		}
 	}
 
-	if err := useCase.magicLinks.MarkUsed(ctx, magicToken.ID); err != nil {
-		return nil, fmt.Errorf("mark used: %w", errors.Join(ErrDatabaseUnavailable, err))
+	if err := usecase.magicLinks.MarkUsed(ctx, magicToken.ID); err != nil {
+		return nil, errors.Join(ErrDatabaseUnavailable, fmt.Errorf("mark used: %w", err))
 	}
 
-	return useCase.issueTokenPair(ctx, currentUser)
+	return usecase.issueTokenPair(ctx, currentUser)
 }
 
-func (useCase *UseCase) Refresh(ctx context.Context, rawRefreshToken string) (*VerifyResult, error) {
+// Refresh rotates the refresh token and returns a new token pair.
+func (usecase *UseCase) Refresh(ctx context.Context, rawRefreshToken string) (*VerifyResult, error) {
 	tokenHash := hashToken(rawRefreshToken)
 
-	storedToken, err := useCase.refreshTokens.GetByHash(ctx, tokenHash)
+	storedToken, err := usecase.refreshTokens.GetByHash(ctx, tokenHash)
 	if err != nil {
-		return nil, fmt.Errorf("get refresh token: %w", errors.Join(ErrDatabaseUnavailable, err))
+		return nil, errors.Join(ErrDatabaseUnavailable, fmt.Errorf("get refresh token: %w", err))
 	}
 	if storedToken == nil || storedToken.RevokedAt != nil {
 		return nil, ErrInvalidToken
@@ -142,25 +147,26 @@ func (useCase *UseCase) Refresh(ctx context.Context, rawRefreshToken string) (*V
 		return nil, ErrInvalidToken
 	}
 
-	if err := useCase.refreshTokens.Revoke(ctx, storedToken.ID); err != nil {
-		return nil, fmt.Errorf("revoke old token: %w", errors.Join(ErrDatabaseUnavailable, err))
+	if err := usecase.refreshTokens.Revoke(ctx, storedToken.ID); err != nil {
+		return nil, errors.Join(ErrDatabaseUnavailable, fmt.Errorf("revoke old token: %w", err))
 	}
 
-	currentUser, err := useCase.users.GetByID(ctx, storedToken.UserID)
+	currentUser, err := usecase.users.GetByID(ctx, storedToken.UserID)
 	if err != nil {
-		return nil, fmt.Errorf("get user: %w", errors.Join(ErrDatabaseUnavailable, err))
+		return nil, errors.Join(ErrDatabaseUnavailable, fmt.Errorf("get user: %w", err))
 	}
 	if currentUser == nil {
 		return nil, ErrUserNotFound
 	}
 
-	return useCase.issueTokenPair(ctx, currentUser)
+	return usecase.issueTokenPair(ctx, currentUser)
 }
 
-func (useCase *UseCase) Logout(ctx context.Context, rawRefreshToken string) error {
+// Logout revokes the given refresh token. Silently succeeds for unknown tokens.
+func (usecase *UseCase) Logout(ctx context.Context, rawRefreshToken string) error {
 	tokenHash := hashToken(rawRefreshToken)
 
-	storedToken, err := useCase.refreshTokens.GetByHash(ctx, tokenHash)
+	storedToken, err := usecase.refreshTokens.GetByHash(ctx, tokenHash)
 	if err != nil {
 		return fmt.Errorf("get refresh token: %w", err)
 	}
@@ -168,25 +174,30 @@ func (useCase *UseCase) Logout(ctx context.Context, rawRefreshToken string) erro
 		return ErrInvalidToken
 	}
 
-	return useCase.refreshTokens.Revoke(ctx, storedToken.ID)
+	return usecase.refreshTokens.Revoke(ctx, storedToken.ID)
 }
 
-func (useCase *UseCase) issueTokenPair(ctx context.Context, currentUser *user.User) (*VerifyResult, error) {
-	accessToken, err := useCase.jwt.GenerateAccessToken(currentUser.ID)
+// GetUserByID returns the user with the given ID, or nil if not found.
+func (usecase *UseCase) GetUserByID(ctx context.Context, id string) (*user.User, error) {
+	return usecase.users.GetByID(ctx, id)
+}
+
+func (usecase *UseCase) issueTokenPair(ctx context.Context, currentUser *user.User) (*VerifyResult, error) {
+	accessToken, err := usecase.jwt.GenerateAccessToken(currentUser.ID)
 	if err != nil {
-		return nil, fmt.Errorf("generate access token: %w", errors.Join(ErrTokenGenerationFailed, err))
+		return nil, errors.Join(ErrTokenGenerationFailed, fmt.Errorf("generate access token: %w", err))
 	}
 
 	rawRefreshToken, err := generateToken()
 	if err != nil {
-		return nil, fmt.Errorf("generate refresh token: %w", errors.Join(ErrTokenGenerationFailed, err))
+		return nil, errors.Join(ErrTokenGenerationFailed, fmt.Errorf("generate refresh token: %w", err))
 	}
 
 	refreshTokenHash := hashToken(rawRefreshToken)
 	expiresAt := time.Now().Add(refreshTokenTTL)
 
-	if _, err := useCase.refreshTokens.Create(ctx, currentUser.ID, refreshTokenHash, expiresAt); err != nil {
-		return nil, fmt.Errorf("store refresh token: %w", errors.Join(ErrDatabaseUnavailable, err))
+	if _, err := usecase.refreshTokens.Create(ctx, currentUser.ID, refreshTokenHash, expiresAt); err != nil {
+		return nil, errors.Join(ErrDatabaseUnavailable, fmt.Errorf("store refresh token: %w", err))
 	}
 
 	return &VerifyResult{
@@ -196,27 +207,26 @@ func (useCase *UseCase) issueTokenPair(ctx context.Context, currentUser *user.Us
 	}, nil
 }
 
-func (useCase *UseCase) generateUsername(ctx context.Context, emailAddr string) (string, error) {
-	prefix := strings.Split(emailAddr, "@")[0]
-	prefix = strings.ToLower(prefix)
+func (usecase *UseCase) generateUsername(ctx context.Context, emailAddr string) (string, error) {
+	prefix := strings.ToLower(strings.Split(emailAddr, "@")[0])
 
-	exists, err := useCase.users.ExistsByUsername(ctx, prefix)
+	exists, err := usecase.users.ExistsByUsername(ctx, prefix)
 	if err != nil {
-		return "", fmt.Errorf("check username: %w", errors.Join(ErrDatabaseUnavailable, err))
+		return "", errors.Join(ErrDatabaseUnavailable, fmt.Errorf("check username: %w", err))
 	}
 	if !exists {
 		return prefix, nil
 	}
 
-	for range 10 {
+	for range maxUsernameAttempts {
 		suffix, err := generateToken()
 		if err != nil {
-			return "", fmt.Errorf("generate suffix: %w", errors.Join(ErrTokenGenerationFailed, err))
+			return "", errors.Join(ErrTokenGenerationFailed, fmt.Errorf("generate suffix: %w", err))
 		}
 		candidate := prefix + "_" + suffix[:4]
-		exists, err := useCase.users.ExistsByUsername(ctx, candidate)
+		exists, err := usecase.users.ExistsByUsername(ctx, candidate)
 		if err != nil {
-			return "", fmt.Errorf("check username: %w", errors.Join(ErrDatabaseUnavailable, err))
+			return "", errors.Join(ErrDatabaseUnavailable, fmt.Errorf("check username: %w", err))
 		}
 		if !exists {
 			return candidate, nil
@@ -226,16 +236,12 @@ func (useCase *UseCase) generateUsername(ctx context.Context, emailAddr string) 
 	return "", ErrUsernameConflict
 }
 
-func (useCase *UseCase) GetUserByID(ctx context.Context, id string) (*user.User, error) {
-	return useCase.users.GetByID(ctx, id)
-}
-
 func generateToken() (string, error) {
-	bytes := make([]byte, 32)
-	if _, err := rand.Read(bytes); err != nil {
+	buf := make([]byte, 32)
+	if _, err := rand.Read(buf); err != nil {
 		return "", err
 	}
-	return base64.URLEncoding.EncodeToString(bytes), nil
+	return base64.URLEncoding.EncodeToString(buf), nil
 }
 
 func hashToken(token string) string {

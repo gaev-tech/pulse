@@ -30,9 +30,9 @@ import (
 	authmiddleware "github.com/gaevivan/pulse/internal/handler/middleware"
 	v1 "github.com/gaevivan/pulse/internal/handler/v1"
 
-	repomagiclink "github.com/gaevivan/pulse/internal/repository/postgres/magic_link"
+	repomagiclink "github.com/gaevivan/pulse/internal/repository/postgres/magiclink"
 	repopat "github.com/gaevivan/pulse/internal/repository/postgres/pat"
-	reporefreshtoken "github.com/gaevivan/pulse/internal/repository/postgres/refresh_token"
+	reporefreshtoken "github.com/gaevivan/pulse/internal/repository/postgres/refreshtoken"
 	repouser "github.com/gaevivan/pulse/internal/repository/postgres/user"
 
 	"github.com/gaevivan/pulse/internal/repository/migrations"

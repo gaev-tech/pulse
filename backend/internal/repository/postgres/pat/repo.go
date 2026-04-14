@@ -7,12 +7,18 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+
+	domain "github.com/gaevivan/pulse/internal/domain/user"
 )
 
+var _ domain.PATRepository = (*Repo)(nil)
+
+// Repo is the PostgreSQL implementation of domain.PATRepository.
 type Repo struct {
 	pool *pgxpool.Pool
 }
 
+// New creates a new PAT Repo.
 func New(pool *pgxpool.Pool) *Repo {
 	return &Repo{pool: pool}
 }
