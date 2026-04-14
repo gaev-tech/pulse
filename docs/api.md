@@ -334,6 +334,26 @@ WebSocket /api/v1/ws/import/{importID}?token=
 
 ---
 
+## Subscriptions
+
+```
+GET /api/v1/subscription
+  Response: { subject_type: "user", subject_id, plan, status }
+  Auth: JWT / PAT
+
+GET /api/v1/teams/{prefix}/subscription
+  Response: { subject_type: "team", subject_id, plan, status }
+  Auth: JWT / PAT
+
+PATCH /api/v1/teams/{prefix}/subscription
+  Body: { plan }
+  Response: { subject_type: "team", subject_id, plan, status }
+  Auth: JWT / PAT
+  Requires: team.manage_owners
+```
+
+---
+
 ## Private Access Token
 
 ```

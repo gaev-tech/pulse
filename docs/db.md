@@ -401,6 +401,32 @@ CREATE TABLE user_sidebar_team_states (
 
 ---
 
+## subscriptions
+
+```sql
+CREATE TABLE subscriptions (
+    id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    subject_type  TEXT NOT NULL,
+    subject_id    UUID NOT NULL,
+    plan          TEXT NOT NULL DEFAULT 'free',
+    status        TEXT NOT NULL DEFAULT 'active',
+    created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+    UNIQUE (subject_type, subject_id)
+);
+
+CREATE INDEX ON subscriptions (subject_type, subject_id);
+```
+
+- `subject_type` — `user` / `team`
+- `subject_id` — UUID пользователя или команды
+- `plan` — `free` / `pro` / `team` / `enterprise`
+- `status` — `active` (единственное значение на данный момент; зарезервировано для будущего)
+- Запись создаётся автоматически при регистрации пользователя (`subject_type = user`, `plan = free`) и при создании команды (`subject_type = team`, `plan = free`)
+- Запись не удаляется, только обновляется
+
+---
+
 ## imports
 
 ```sql

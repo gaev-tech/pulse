@@ -14,6 +14,13 @@
 | API docs | Swagger / OpenAPI (swaggo/http-swagger) |
 | File storage | MinIO |
 
+## External services
+
+| Service | Purpose |
+|---|---|
+| Resend | Отправка email (magic link). Free: 3 000 писем/мес |
+| ЮKassa | Рекуррентные платежи и подписки (российский рынок) |
+
 ## Backend dependencies
 
 | Package | Purpose |
