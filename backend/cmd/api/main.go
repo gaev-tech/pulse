@@ -12,10 +12,21 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/gaevivan/pulse/internal/infrastructure/config"
+	"github.com/gaevivan/pulse/internal/infrastructure/email"
+	infrajwt "github.com/gaevivan/pulse/internal/infrastructure/jwt"
 	"github.com/gaevivan/pulse/internal/infrastructure/logger"
 	"github.com/gaevivan/pulse/internal/infrastructure/postgres"
+
+	authmiddleware "github.com/gaevivan/pulse/internal/handler/middleware"
 	v1 "github.com/gaevivan/pulse/internal/handler/v1"
+
+	repomagiclink "github.com/gaevivan/pulse/internal/repository/postgres/magic_link"
+	repopat "github.com/gaevivan/pulse/internal/repository/postgres/pat"
+	reporefreshtoken "github.com/gaevivan/pulse/internal/repository/postgres/refresh_token"
+	repouser "github.com/gaevivan/pulse/internal/repository/postgres/user"
+
 	"github.com/gaevivan/pulse/internal/repository/migrations"
+	userusecase "github.com/gaevivan/pulse/internal/usecase/user"
 )
 
 func main() {
@@ -37,17 +48,46 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	db, err := postgres.New(ctx, cfg.Database)
+	pool, err := postgres.New(ctx, cfg.Database)
 	if err != nil {
 		log.Fatal("failed to connect to database", zap.Error(err))
 	}
-	defer db.Close()
+	defer pool.Close()
 
 	log.Info("connected to database")
 
+	// Repositories
+	userRepo := repouser.New(pool)
+	magicLinkRepo := repomagiclink.New(pool)
+	refreshTokenRepo := reporefreshtoken.New(pool)
+	patRepo := repopat.New(pool)
+
+	// Infrastructure
+	jwtManager := infrajwt.New(cfg.JWT.Secret)
+	emailSender := email.NewResend(cfg.Resend.APIKey, cfg.Resend.FromEmail)
+
+	// UseCases
+	userUseCase := userusecase.New(
+		userRepo,
+		magicLinkRepo,
+		refreshTokenRepo,
+		jwtManager,
+		emailSender,
+		cfg.FrontendURL,
+	)
+
+	// Middleware
+	authMW := authmiddleware.NewAuth(jwtManager, patRepo)
+
+	// Handlers
+	authHandler := v1.NewAuthHandler(userUseCase)
+
 	server := &http.Server{
-		Addr:         ":" + cfg.Port,
-		Handler:      v1.NewRouter(),
+		Addr: ":" + cfg.Port,
+		Handler: v1.NewRouter(v1.Deps{
+			Auth:   authHandler,
+			AuthMW: authMW,
+		}),
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
 		IdleTimeout:  60 * time.Second,

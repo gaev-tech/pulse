@@ -6,9 +6,16 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+
+	authmiddleware "github.com/gaevivan/pulse/internal/handler/middleware"
 )
 
-func NewRouter() http.Handler {
+type Deps struct {
+	Auth    *AuthHandler
+	AuthMW  *authmiddleware.Auth
+}
+
+func NewRouter(deps Deps) http.Handler {
 	router := chi.NewRouter()
 
 	router.Use(middleware.RequestID)
@@ -16,6 +23,17 @@ func NewRouter() http.Handler {
 	router.Use(middleware.Recoverer)
 
 	router.Get("/health", healthHandler)
+
+	router.Route("/v1", func(router chi.Router) {
+		router.Route("/auth", func(router chi.Router) {
+			router.Post("/magic-link", deps.Auth.SendMagicLink)
+			router.Post("/magic-link/verify", deps.Auth.VerifyMagicLink)
+			router.Post("/refresh", deps.Auth.Refresh)
+			router.Post("/logout", deps.Auth.Logout)
+
+			router.With(deps.AuthMW.Required).Get("/me", deps.Auth.Me)
+		})
+	})
 
 	return router
 }

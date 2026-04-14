@@ -5,11 +5,13 @@ import (
 )
 
 type Config struct {
-	Port     string
-	Env      string
-	Database DatabaseConfig
-	JWT      JWTConfig
-	MinIO    MinIOConfig
+	Port        string
+	Env         string
+	FrontendURL string
+	Database    DatabaseConfig
+	JWT         JWTConfig
+	MinIO       MinIOConfig
+	Resend      ResendConfig
 }
 
 type DatabaseConfig struct {
@@ -32,10 +34,16 @@ type MinIOConfig struct {
 	UseSSL    bool
 }
 
+type ResendConfig struct {
+	APIKey    string
+	FromEmail string
+}
+
 func Load() *Config {
 	return &Config{
-		Port: getEnv("PORT", "8080"),
-		Env:  getEnv("ENV", "development"),
+		Port:        getEnv("PORT", "8080"),
+		Env:         getEnv("ENV", "development"),
+		FrontendURL: getEnv("FRONTEND_URL", "http://localhost:5173"),
 		Database: DatabaseConfig{
 			Host:     getEnv("POSTGRES_HOST", "localhost"),
 			Port:     getEnv("POSTGRES_PORT", "5432"),
@@ -52,6 +60,10 @@ func Load() *Config {
 			SecretKey: getEnv("MINIO_SECRET_KEY", "minioadmin"),
 			Bucket:    getEnv("MINIO_BUCKET", "pulse"),
 			UseSSL:    getEnv("MINIO_USE_SSL", "false") == "true",
+		},
+		Resend: ResendConfig{
+			APIKey:    getEnv("RESEND_API_KEY", ""),
+			FromEmail: getEnv("RESEND_FROM_EMAIL", "noreply@pulse.app"),
 		},
 	}
 }
