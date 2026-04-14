@@ -2,7 +2,6 @@
 	import { goto } from '$app/navigation';
 	import { session, getActiveAccount, removeAccount, switchAccount } from '../../stores/session';
 	import { auth } from '../../api/auth';
-	import { showError } from '../../stores/toast';
 
 	export let open = false;
 

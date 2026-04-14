@@ -76,7 +76,16 @@ func main() {
 
 	// Infrastructure
 	jwtManager := infrajwt.New(cfg.JWT.Secret)
-	emailSender := email.NewResend(cfg.Resend.APIKey, cfg.Resend.FromEmail)
+
+	var emailSender email.Sender
+	if cfg.Env != "production" {
+		log.Warn("non-production environment, using log sender (magic links printed to stdout)")
+		emailSender = email.NewLogSender(log)
+	} else if cfg.Resend.APIKey == "" {
+		log.Fatal("RESEND_API_KEY is required in production")
+	} else {
+		emailSender = email.NewResend(cfg.Resend.APIKey, cfg.Resend.FromEmail)
+	}
 
 	// UseCases
 	userUseCase := userusecase.New(

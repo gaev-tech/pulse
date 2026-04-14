@@ -1,8 +1,6 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { auth } from '../../api/auth';
-	import { getActiveAccount } from '../../stores/session';
 
 	let email = '';
 	let emailError = '';
@@ -10,11 +8,6 @@
 	let sent = false;
 	let touched = false;
 
-	onMount(() => {
-		if (getActiveAccount()) {
-			goto('/');
-		}
-	});
 
 	function validateEmail(value: string): string {
 		if (!value.trim()) return 'Введите email';

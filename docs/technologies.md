@@ -44,3 +44,7 @@
 | Vite | Build tool + dev server |
 | Playwright | E2E testing |
 | `@milkdown/crepe` | Markdown editor |
+| `zod` | Runtime-валидация данных |
+| `@zodios/core` | Типизированный HTTP-клиент с Zod-валидацией ответов |
+| `openapi-zod-client` | Генерация Zod-схем и клиента из OpenAPI-схемы (dev) |
+| `swagger2openapi` | Конвертация Swagger 2.0 → OpenAPI 3.0 (dev) |

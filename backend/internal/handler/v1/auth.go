@@ -41,7 +41,16 @@ func (handler *AuthHandler) SendMagicLink(writer http.ResponseWriter, request *h
 	}
 
 	if err := handler.usecase.SendMagicLink(request.Context(), body.Email); err != nil {
-		apierror.Internal(writer)
+		switch {
+		case errors.Is(err, userusecase.ErrEmailUnavailable):
+			apierror.EmailUnavailable(writer)
+		case errors.Is(err, userusecase.ErrDatabaseUnavailable):
+			apierror.DatabaseUnavailable(writer)
+		case errors.Is(err, userusecase.ErrTokenGenerationFailed):
+			apierror.TokenGenerationFailed(writer)
+		default:
+			apierror.Internal(writer)
+		}
 		return
 	}
 
@@ -73,11 +82,18 @@ func (handler *AuthHandler) VerifyMagicLink(writer http.ResponseWriter, request 
 
 	result, err := handler.usecase.VerifyMagicLink(request.Context(), body.Token)
 	if err != nil {
-		if errors.Is(err, userusecase.ErrInvalidToken) || errors.Is(err, userusecase.ErrTokenUsed) {
+		switch {
+		case errors.Is(err, userusecase.ErrInvalidToken), errors.Is(err, userusecase.ErrTokenUsed):
 			apierror.Unauthorized(writer)
-			return
+		case errors.Is(err, userusecase.ErrDatabaseUnavailable):
+			apierror.DatabaseUnavailable(writer)
+		case errors.Is(err, userusecase.ErrTokenGenerationFailed):
+			apierror.TokenGenerationFailed(writer)
+		case errors.Is(err, userusecase.ErrUsernameConflict):
+			apierror.UsernameConflict(writer)
+		default:
+			apierror.Internal(writer)
 		}
-		apierror.Internal(writer)
 		return
 	}
 
@@ -119,11 +135,18 @@ func (handler *AuthHandler) Refresh(writer http.ResponseWriter, request *http.Re
 
 	result, err := handler.usecase.Refresh(request.Context(), body.RefreshToken)
 	if err != nil {
-		if errors.Is(err, userusecase.ErrInvalidToken) {
+		switch {
+		case errors.Is(err, userusecase.ErrInvalidToken):
 			apierror.Unauthorized(writer)
-			return
+		case errors.Is(err, userusecase.ErrUserNotFound):
+			apierror.UserNotFound(writer)
+		case errors.Is(err, userusecase.ErrDatabaseUnavailable):
+			apierror.DatabaseUnavailable(writer)
+		case errors.Is(err, userusecase.ErrTokenGenerationFailed):
+			apierror.TokenGenerationFailed(writer)
+		default:
+			apierror.Internal(writer)
 		}
-		apierror.Internal(writer)
 		return
 	}
 
@@ -177,8 +200,12 @@ func (handler *AuthHandler) Me(writer http.ResponseWriter, request *http.Request
 	}
 
 	currentUser, err := handler.usecase.GetUserByID(request.Context(), userID)
-	if err != nil || currentUser == nil {
-		apierror.Internal(writer)
+	if err != nil {
+		apierror.DatabaseUnavailable(writer)
+		return
+	}
+	if currentUser == nil {
+		apierror.UserNotFound(writer)
 		return
 	}
 

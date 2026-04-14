@@ -18,7 +18,15 @@
 
 		try {
 			const result = await auth.verifyMagicLink(token);
-			addAccount(result.user, result.access_token, result.refresh_token);
+			const { user, access_token, refresh_token } = result;
+			if (!user?.id || !user?.email || !user?.username || !access_token || !refresh_token) {
+				throw new Error('Некорректный ответ сервера');
+			}
+			addAccount(
+				{ id: user.id, email: user.email, username: user.username },
+				access_token,
+				refresh_token
+			);
 			goto('/');
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Ссылка недействительна или уже использована';

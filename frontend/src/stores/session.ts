@@ -31,7 +31,7 @@ function saveToStorage(state: SessionState) {
 	localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
-const { subscribe, set, update } = writable<SessionState>(loadFromStorage());
+const { subscribe, update } = writable<SessionState>(loadFromStorage());
 
 export const session = { subscribe };
 

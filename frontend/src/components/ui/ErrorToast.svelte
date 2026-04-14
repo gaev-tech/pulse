@@ -15,9 +15,9 @@
 </script>
 
 {#if $toastError}
-	<div class="error-toast" role="alert" on:click={dismiss} on:keydown={dismiss}>
+	<div class="error-toast" role="alert">
 		<span>{$toastError}</span>
-		<button type="button" aria-label="Закрыть">✕</button>
+		<button type="button" aria-label="Закрыть" on:click={dismiss}>✕</button>
 	</div>
 {/if}
 

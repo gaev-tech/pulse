@@ -1,7 +1,7 @@
 include .env
 export
 
-.PHONY: dev prod prod-down prod-down-v lint test-api test-e2e test-e2e-ui swagger seed
+.PHONY: dev prod prod-down prod-down-v lint test-api test-e2e test-e2e-ui swagger generate-types seed
 
 ## Запустить dev-окружение (останавливает prod, если запущен)
 dev:
@@ -50,9 +50,14 @@ test-e2e:
 test-e2e-ui:
 	cd e2e && npx --registry https://registry.npmjs.org/ playwright test --ui
 
-## Сгенерировать Swagger-документацию
+## Сгенерировать Swagger-документацию и сконвертировать в OpenAPI 3.0
 swagger:
 	cd backend && swag init -g cmd/api/main.go -o api
+	cd backend && npx --registry https://registry.npmjs.org/ --yes swagger2openapi api/docs/swagger.yaml -o api/docs/openapi.yaml
+
+## Сгенерировать Zod-схемы и типизированный клиент из OpenAPI-схемы
+generate-types:
+	cd frontend && npx --registry https://registry.npmjs.org/ openapi-zod-client ../backend/api/docs/openapi.yaml -o src/api/generated.ts
 
 ## Заполнить базу тестовыми данными
 seed:
