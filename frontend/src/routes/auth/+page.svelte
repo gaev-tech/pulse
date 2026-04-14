@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { Button } from '$lib/components/ui/button';
+	import { Input } from '$lib/components/ui/input';
 	import { auth } from '../../api/auth';
 
 	let email = '';
@@ -7,7 +9,6 @@
 	let loading = false;
 	let sent = false;
 	let touched = false;
-
 
 	function validateEmail(value: string): string {
 		if (!value.trim()) return 'Введите email';
@@ -60,19 +61,19 @@
 				<p class="sent-message">
 					Проверьте почту — ссылка отправлена на <strong>{email}</strong>
 				</p>
-				<button type="button" class="btn-secondary" on:click={handleResend} disabled={loading}>
+				<Button variant="outline" class="w-full" on:click={handleResend} disabled={loading}>
 					{#if loading}
 						<span class="loader" />
 					{:else}
 						Отправить снова
 					{/if}
-				</button>
+				</Button>
 			</div>
 		{:else}
 			<form on:submit|preventDefault={handleSubmit} novalidate>
-				<div class="field" class:has-error={touched && emailError}>
+				<div class="field">
 					<label for="email">Email</label>
-					<input
+					<Input
 						id="email"
 						type="email"
 						bind:value={email}
@@ -80,19 +81,20 @@
 						placeholder="you@example.com"
 						autocomplete="email"
 						disabled={loading}
+						class={touched && emailError ? 'border-red-500' : ''}
 					/>
 					{#if touched && emailError}
 						<span class="field-error">{emailError}</span>
 					{/if}
 				</div>
 
-				<button type="submit" class="btn-primary" disabled={loading}>
+				<Button type="submit" class="w-full" disabled={loading}>
 					{#if loading}
 						<span class="loader" />
 					{:else}
 						Войти
 					{/if}
-				</button>
+				</Button>
 			</form>
 		{/if}
 	</div>
@@ -104,11 +106,13 @@
 		align-items: center;
 		justify-content: center;
 		min-height: 100vh;
-		background: #f5f5f5;
+		background: hsl(var(--background));
 	}
 
 	.auth-card {
-		background: #fff;
+		background: hsl(var(--card));
+		color: hsl(var(--card-foreground));
+		border: 1px solid hsl(var(--border));
 		border-radius: 12px;
 		padding: 40px;
 		width: 100%;
@@ -119,6 +123,7 @@
 	.auth-title {
 		font-size: 28px;
 		font-weight: 700;
+		color: hsl(var(--foreground));
 		margin: 0 0 32px;
 		text-align: center;
 	}
@@ -133,76 +138,12 @@
 	label {
 		font-size: 14px;
 		font-weight: 500;
-		color: #374151;
-	}
-
-	input {
-		border: 1px solid #d1d5db;
-		border-radius: 6px;
-		padding: 10px 12px;
-		font-size: 14px;
-		outline: none;
-		transition: border-color 0.15s;
-	}
-
-	input:focus {
-		border-color: #6366f1;
-	}
-
-	.has-error input {
-		border-color: #ef4444;
+		color: hsl(var(--foreground));
 	}
 
 	.field-error {
 		font-size: 12px;
-		color: #ef4444;
-	}
-
-	.btn-primary {
-		width: 100%;
-		padding: 11px;
-		background: #6366f1;
-		color: #fff;
-		border: none;
-		border-radius: 6px;
-		font-size: 14px;
-		font-weight: 500;
-		cursor: pointer;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		min-height: 40px;
-		transition: background 0.15s;
-	}
-
-	.btn-primary:hover:not(:disabled) {
-		background: #4f46e5;
-	}
-
-	.btn-primary:disabled {
-		opacity: 0.7;
-		cursor: not-allowed;
-	}
-
-	.btn-secondary {
-		width: 100%;
-		padding: 11px;
-		background: transparent;
-		color: #6366f1;
-		border: 1px solid #6366f1;
-		border-radius: 6px;
-		font-size: 14px;
-		font-weight: 500;
-		cursor: pointer;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		min-height: 40px;
-		transition: background 0.15s;
-	}
-
-	.btn-secondary:hover:not(:disabled) {
-		background: #eef2ff;
+		color: hsl(var(--destructive));
 	}
 
 	.sent-state {
@@ -214,7 +155,7 @@
 
 	.sent-message {
 		font-size: 14px;
-		color: #374151;
+		color: hsl(var(--foreground));
 		line-height: 1.5;
 		margin: 0;
 	}
@@ -227,11 +168,6 @@
 		border-radius: 50%;
 		animation: spin 0.6s linear infinite;
 		display: inline-block;
-	}
-
-	.btn-secondary .loader {
-		border-color: rgba(99, 102, 241, 0.3);
-		border-top-color: #6366f1;
 	}
 
 	@keyframes spin {

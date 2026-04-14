@@ -3,7 +3,6 @@
 </script>
 
 <div class="zero-state">
-	<span class="icon">·</span>
 	<p class="message">{message}</p>
 </div>
 
@@ -13,17 +12,11 @@
 		flex-direction: column;
 		align-items: center;
 		padding: 16px 0;
-		gap: 6px;
-	}
-
-	.icon {
-		font-size: 20px;
-		color: rgba(205, 214, 244, 0.2);
 	}
 
 	.message {
 		font-size: 12px;
-		color: rgba(205, 214, 244, 0.35);
+		color: hsl(var(--muted-foreground));
 		margin: 0;
 	}
 </style>

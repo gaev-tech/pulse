@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { X } from 'lucide-svelte';
 	import { toastError } from '../../stores/toast';
 
 	let timer: ReturnType<typeof setTimeout>;
@@ -17,7 +18,9 @@
 {#if $toastError}
 	<div class="error-toast" role="alert">
 		<span>{$toastError}</span>
-		<button type="button" aria-label="Закрыть" on:click={dismiss}>✕</button>
+		<button type="button" aria-label="Закрыть" on:click={dismiss}>
+			<X size={14} />
+		</button>
 	</div>
 {/if}
 
@@ -30,8 +33,8 @@
 		display: flex;
 		align-items: center;
 		gap: 12px;
-		background: #ef4444;
-		color: #fff;
+		background: hsl(var(--destructive));
+		color: hsl(var(--destructive-foreground));
 		padding: 12px 16px;
 		border-radius: 8px;
 		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
@@ -41,11 +44,12 @@
 	}
 
 	button {
+		display: flex;
+		align-items: center;
 		background: none;
 		border: none;
-		color: #fff;
+		color: hsl(var(--destructive-foreground));
 		cursor: pointer;
-		font-size: 14px;
 		padding: 0;
 		flex-shrink: 0;
 	}

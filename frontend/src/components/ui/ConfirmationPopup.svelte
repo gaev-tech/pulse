@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { Button } from '$lib/components/ui/button';
+
 	export let open: boolean = false;
 	export let operation: string;
 	export let onConfirm: () => void;
@@ -10,8 +12,8 @@
 	<div class="popup" role="dialog" aria-modal="true">
 		<p class="message">Вы подтверждаете {operation}?</p>
 		<div class="actions">
-			<button class="btn-cancel" on:click={onCancel}>Отмена</button>
-			<button class="btn-confirm" on:click={onConfirm}>Да, подтверждаю</button>
+			<Button variant="outline" on:click={onCancel}>Отмена</Button>
+			<Button variant="destructive" on:click={onConfirm}>Да, подтверждаю</Button>
 		</div>
 	</div>
 {/if}
@@ -30,7 +32,9 @@
 		left: 50%;
 		transform: translate(-50%, -50%);
 		z-index: 100;
-		background: #fff;
+		background: hsl(var(--card));
+		color: hsl(var(--card-foreground));
+		border: 1px solid hsl(var(--border));
 		border-radius: 10px;
 		padding: 24px;
 		min-width: 320px;
@@ -39,7 +43,7 @@
 
 	.message {
 		font-size: 14px;
-		color: #374151;
+		color: hsl(var(--foreground));
 		margin: 0 0 20px;
 	}
 
@@ -47,35 +51,5 @@
 		display: flex;
 		justify-content: flex-end;
 		gap: 8px;
-	}
-
-	.btn-cancel {
-		padding: 8px 16px;
-		background: none;
-		border: 1px solid #d1d5db;
-		border-radius: 6px;
-		font-size: 14px;
-		color: #374151;
-		cursor: pointer;
-		transition: background 0.1s;
-	}
-
-	.btn-cancel:hover {
-		background: #f9fafb;
-	}
-
-	.btn-confirm {
-		padding: 8px 16px;
-		background: #ef4444;
-		border: none;
-		border-radius: 6px;
-		font-size: 14px;
-		color: #fff;
-		cursor: pointer;
-		transition: background 0.1s;
-	}
-
-	.btn-confirm:hover {
-		background: #dc2626;
 	}
 </style>

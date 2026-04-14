@@ -24,31 +24,32 @@
 		align-items: center;
 		justify-content: center;
 		min-height: 100vh;
-		background: #f9fafb;
+		background: hsl(var(--background));
 		text-align: center;
 		padding: 32px;
 	}
 
 	h1 {
 		font-size: 28px;
-		color: #111827;
+		font-weight: 700;
+		color: hsl(var(--foreground));
 		margin: 0 0 12px;
 	}
 
 	p {
 		font-size: 14px;
-		color: #6b7280;
+		color: hsl(var(--muted-foreground));
 		margin: 0 0 8px;
 	}
 
 	.status-code {
 		font-size: 12px;
-		color: #9ca3af;
+		opacity: 0.6;
 	}
 
 	.home-link {
 		margin-top: 24px;
-		color: #6366f1;
+		color: hsl(var(--primary));
 		font-size: 14px;
 		text-decoration: none;
 		font-weight: 500;

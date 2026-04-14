@@ -1,7 +1,10 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { Sun, Moon, Monitor, LogOut, UserPlus } from 'lucide-svelte';
 	import { session, getActiveAccount, removeAccount, switchAccount } from '../../stores/session';
 	import { auth } from '../../api/auth';
+	import { theme, setTheme } from '../../stores/theme';
+	import type { ThemeMode } from '../../stores/theme';
 
 	export let open = false;
 
@@ -39,6 +42,12 @@
 	function handleBackdropClick() {
 		open = false;
 	}
+
+	const THEME_OPTIONS: Array<{ mode: ThemeMode; icon: typeof Sun; label: string }> = [
+		{ mode: 'light', icon: Sun, label: 'Светлая' },
+		{ mode: 'dark', icon: Moon, label: 'Тёмная' },
+		{ mode: 'system', icon: Monitor, label: 'Системная' }
+	];
 </script>
 
 {#if open}
@@ -66,9 +75,28 @@
 			{/each}
 		</ul>
 
+		<div class="theme-section">
+			<span class="theme-label">Тема</span>
+			<div class="theme-buttons">
+				{#each THEME_OPTIONS as opt}
+					<button
+						type="button"
+						class="theme-btn"
+						class:active={$theme === opt.mode}
+						on:click={() => setTheme(opt.mode)}
+						aria-label={opt.label}
+						title={opt.label}
+					>
+						<svelte:component this={opt.icon} size={14} />
+					</button>
+				{/each}
+			</div>
+		</div>
+
 		<div class="actions">
 			<button type="button" class="action-btn" on:click={handleAddUser}>
-				+ Добавить пользователя
+				<UserPlus size={14} />
+				Добавить пользователя
 			</button>
 			<button
 				type="button"
@@ -79,6 +107,7 @@
 				{#if loggingOut}
 					<span class="loader" />
 				{:else}
+					<LogOut size={14} />
 					Выйти
 				{/if}
 			</button>
@@ -98,7 +127,9 @@
 		bottom: 64px;
 		left: 16px;
 		z-index: 100;
-		background: #fff;
+		background: hsl(var(--popover));
+		color: hsl(var(--popover-foreground));
+		border: 1px solid hsl(var(--border));
 		border-radius: 10px;
 		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
 		min-width: 240px;
@@ -109,7 +140,7 @@
 		list-style: none;
 		margin: 0;
 		padding: 8px 0;
-		border-bottom: 1px solid #f3f4f6;
+		border-bottom: 1px solid hsl(var(--border));
 	}
 
 	.account-item {
@@ -122,22 +153,23 @@
 		border: none;
 		cursor: pointer;
 		text-align: left;
-		transition: background 0.1s;
+		transition: background 0.15s;
+		font-family: inherit;
 	}
 
 	.account-item:hover {
-		background: #f9fafb;
+		background: hsl(var(--muted));
 	}
 
 	.account-item.active {
-		background: #eef2ff;
+		background: hsl(var(--accent));
 	}
 
 	.avatar {
 		width: 32px;
 		height: 32px;
-		background: #6366f1;
-		color: #fff;
+		background: hsl(var(--primary));
+		color: hsl(var(--primary-foreground));
 		border-radius: 50%;
 		display: flex;
 		align-items: center;
@@ -157,7 +189,7 @@
 	.username {
 		font-size: 13px;
 		font-weight: 500;
-		color: #111827;
+		color: hsl(var(--foreground));
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
@@ -165,10 +197,55 @@
 
 	.email {
 		font-size: 12px;
-		color: #6b7280;
+		color: hsl(var(--muted-foreground));
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
+	}
+
+	.theme-section {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 10px 16px;
+		border-bottom: 1px solid hsl(var(--border));
+	}
+
+	.theme-label {
+		font-size: 12px;
+		color: hsl(var(--muted-foreground));
+	}
+
+	.theme-buttons {
+		display: flex;
+		gap: 2px;
+		background: hsl(var(--muted));
+		border-radius: 6px;
+		padding: 2px;
+	}
+
+	.theme-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 28px;
+		height: 28px;
+		background: none;
+		border: none;
+		cursor: pointer;
+		border-radius: 4px;
+		color: hsl(var(--muted-foreground));
+		transition: background 0.15s, color 0.15s;
+	}
+
+	.theme-btn:hover {
+		background: hsl(var(--secondary));
+		color: hsl(var(--foreground));
+	}
+
+	.theme-btn.active {
+		background: hsl(var(--card));
+		color: hsl(var(--foreground));
 	}
 
 	.actions {
@@ -180,25 +257,25 @@
 	.action-btn {
 		display: flex;
 		align-items: center;
-		justify-content: center;
+		gap: 8px;
 		width: 100%;
 		padding: 10px 16px;
 		background: none;
 		border: none;
 		cursor: pointer;
 		font-size: 13px;
-		color: #374151;
+		color: hsl(var(--foreground));
 		text-align: left;
-		justify-content: flex-start;
-		transition: background 0.1s;
+		transition: background 0.15s;
+		font-family: inherit;
 	}
 
 	.action-btn:hover:not(:disabled) {
-		background: #f9fafb;
+		background: hsl(var(--muted));
 	}
 
 	.logout-btn {
-		color: #ef4444;
+		color: hsl(var(--destructive));
 	}
 
 	.logout-btn:disabled {
@@ -209,8 +286,8 @@
 	.loader {
 		width: 14px;
 		height: 14px;
-		border: 2px solid rgba(239, 68, 68, 0.3);
-		border-top-color: #ef4444;
+		border: 2px solid hsl(var(--destructive) / 0.3);
+		border-top-color: hsl(var(--destructive));
 		border-radius: 50%;
 		animation: spin 0.6s linear infinite;
 		display: inline-block;

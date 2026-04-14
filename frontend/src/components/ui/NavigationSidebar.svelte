@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { getActiveAccount, session } from '../../stores/session';
+	import { Search, ChevronRight, ChevronDown, Plus, Activity } from 'lucide-svelte';
 	import ProfilePopup from './ProfilePopup.svelte';
 	import ZeroState from './ZeroState.svelte';
 
@@ -52,8 +53,17 @@
 
 <aside class="sidebar">
 	<div class="sidebar-header">
-		<span class="logo-icon">◆</span>
+		<div class="logo-icon">
+			<Activity size={16} />
+		</div>
 		<span class="logo-text">Pulse</span>
+	</div>
+
+	<div class="search-row">
+		<button type="button" class="search-btn" aria-label="Поиск">
+			<Search size={13} />
+			<span>Поиск...</span>
+		</button>
 	</div>
 
 	<nav class="sidebar-nav">
@@ -68,12 +78,19 @@
 
 		<div class="section">
 			<button type="button" class="section-header" on:click={toggleFilters}>
-				<span class="chevron" class:open={filtersOpen}>›</span>
+				{#if filtersOpen}
+					<ChevronDown size={12} />
+				{:else}
+					<ChevronRight size={12} />
+				{/if}
 				Личные фильтры
 			</button>
 			{#if filtersOpen}
 				<div class="section-body">
-					<button type="button" class="action-btn">+ Создать фильтр</button>
+					<button type="button" class="action-btn">
+						<Plus size={11} />
+						Создать фильтр
+					</button>
 					<ZeroState message="Нет фильтров" />
 					<button type="button" class="action-btn">Импортировать задачи</button>
 				</div>
@@ -82,12 +99,19 @@
 
 		<div class="section">
 			<button type="button" class="section-header" on:click={toggleTeams}>
-				<span class="chevron" class:open={teamsOpen}>›</span>
+				{#if teamsOpen}
+					<ChevronDown size={12} />
+				{:else}
+					<ChevronRight size={12} />
+				{/if}
 				Команды
 			</button>
 			{#if teamsOpen}
 				<div class="section-body">
-					<button type="button" class="action-btn">+ Создать команду</button>
+					<button type="button" class="action-btn">
+						<Plus size={11} />
+						Создать команду
+					</button>
 					<ZeroState message="Нет команд" />
 				</div>
 			{/if}
@@ -132,63 +156,98 @@
 <style>
 	.sidebar {
 		width: 240px;
-		background: #1e1e2e;
-		color: #cdd6f4;
+		background: hsl(var(--card));
+		color: hsl(var(--foreground));
 		display: flex;
 		flex-direction: column;
 		flex-shrink: 0;
 		position: relative;
 		height: 100vh;
+		border-right: 1px solid hsl(var(--border));
 	}
 
 	.sidebar-header {
 		display: flex;
 		align-items: center;
 		gap: 8px;
-		padding: 20px 16px;
-		border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+		padding: 16px;
+		border-bottom: 1px solid hsl(var(--border));
 		flex-shrink: 0;
 	}
 
 	.logo-icon {
-		font-size: 14px;
-		color: #cba6f7;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 24px;
+		height: 24px;
+		background: hsl(var(--primary));
+		color: hsl(var(--primary-foreground));
+		border-radius: 6px;
+		flex-shrink: 0;
 	}
 
 	.logo-text {
-		font-size: 18px;
+		font-size: 15px;
 		font-weight: 700;
-		color: #cba6f7;
+		color: hsl(var(--foreground));
+	}
+
+	.search-row {
+		padding: 8px 10px;
+		flex-shrink: 0;
+	}
+
+	.search-btn {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		width: 100%;
+		padding: 6px 8px;
+		background: hsl(var(--muted));
+		border: 1px solid hsl(var(--border));
+		border-radius: 6px;
+		cursor: pointer;
+		font-size: 12px;
+		color: hsl(var(--muted-foreground));
+		transition: background 0.15s;
+		text-align: left;
+		font-family: inherit;
+	}
+
+	.search-btn:hover {
+		background: hsl(var(--secondary));
 	}
 
 	.sidebar-nav {
 		flex: 1;
 		overflow-y: auto;
-		padding: 8px 0;
+		padding: 4px 0;
 	}
 
 	.nav-item {
 		display: flex;
 		align-items: center;
 		width: 100%;
-		padding: 8px 16px;
+		padding: 7px 12px;
 		background: none;
 		border: none;
 		cursor: pointer;
 		font-size: 13px;
-		color: #cdd6f4;
+		color: hsl(var(--foreground));
 		text-align: left;
-		transition: background 0.1s;
-		border-radius: 0;
+		transition: background 0.15s;
+		font-family: inherit;
 	}
 
 	.nav-item:hover {
-		background: rgba(255, 255, 255, 0.06);
+		background: hsl(var(--muted));
 	}
 
 	.nav-item.active {
-		background: rgba(99, 102, 241, 0.15);
-		color: #a5b4fc;
+		background: hsl(var(--accent));
+		color: hsl(var(--accent-foreground));
+		font-weight: 500;
 	}
 
 	.section {
@@ -198,62 +257,54 @@
 	.section-header {
 		display: flex;
 		align-items: center;
-		gap: 6px;
+		gap: 4px;
 		width: 100%;
-		padding: 7px 16px;
+		padding: 6px 12px;
 		background: none;
 		border: none;
 		cursor: pointer;
 		font-size: 11px;
 		font-weight: 600;
-		color: rgba(205, 214, 244, 0.5);
+		color: hsl(var(--muted-foreground));
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
 		text-align: left;
-		transition: background 0.1s;
+		transition: background 0.15s;
+		font-family: inherit;
 	}
 
 	.section-header:hover {
-		background: rgba(255, 255, 255, 0.04);
-	}
-
-	.chevron {
-		font-size: 14px;
-		line-height: 1;
-		display: inline-block;
-		transition: transform 0.15s;
-		transform: rotate(0deg);
-	}
-
-	.chevron.open {
-		transform: rotate(90deg);
+		background: hsl(var(--muted));
 	}
 
 	.section-body {
-		padding: 0 0 4px 12px;
+		padding: 0 0 4px 16px;
 	}
 
 	.action-btn {
-		display: block;
+		display: flex;
+		align-items: center;
+		gap: 5px;
 		width: 100%;
-		padding: 6px 16px;
+		padding: 5px 12px;
 		background: none;
 		border: none;
 		cursor: pointer;
 		font-size: 12px;
-		color: rgba(205, 214, 244, 0.45);
+		color: hsl(var(--muted-foreground));
 		text-align: left;
-		transition: color 0.1s;
+		transition: color 0.15s;
+		font-family: inherit;
 	}
 
 	.action-btn:hover {
-		color: #cdd6f4;
+		color: hsl(var(--foreground));
 	}
 
 	.sidebar-footer {
 		margin-top: auto;
-		padding: 12px 8px;
-		border-top: 1px solid rgba(255, 255, 255, 0.06);
+		padding: 10px 8px;
+		border-top: 1px solid hsl(var(--border));
 		flex-shrink: 0;
 	}
 
@@ -267,19 +318,21 @@
 		cursor: pointer;
 		padding: 8px;
 		border-radius: 6px;
-		color: #cdd6f4;
-		transition: background 0.1s;
+		color: hsl(var(--foreground));
+		transition: background 0.15s;
+		text-align: left;
+		font-family: inherit;
 	}
 
 	.profile-btn:hover {
-		background: rgba(255, 255, 255, 0.06);
+		background: hsl(var(--muted));
 	}
 
 	.avatar {
 		width: 28px;
 		height: 28px;
-		background: #6366f1;
-		color: #fff;
+		background: hsl(var(--primary));
+		color: hsl(var(--primary-foreground));
 		border-radius: 50%;
 		display: flex;
 		align-items: center;

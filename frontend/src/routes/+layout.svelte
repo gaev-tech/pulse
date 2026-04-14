@@ -1,8 +1,10 @@
 <script lang="ts">
+	import '../app.css';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { getActiveAccount } from '../stores/session';
+	import { initTheme } from '../stores/theme';
 	import ErrorToast from '../components/ui/ErrorToast.svelte';
 	import NavigationSidebar from '../components/ui/NavigationSidebar.svelte';
 
@@ -11,6 +13,7 @@
 	$: isPublic = PUBLIC_ROUTES.some((route) => $page.url.pathname.startsWith(route));
 
 	onMount(() => {
+		initTheme();
 		if (!isPublic && !getActiveAccount()) {
 			goto('/auth');
 		}
@@ -40,6 +43,6 @@
 	.main-content {
 		flex: 1;
 		overflow: auto;
-		background: #f9fafb;
+		background: hsl(var(--background));
 	}
 </style>
