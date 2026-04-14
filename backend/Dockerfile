@@ -5,12 +5,13 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 
+RUN go install github.com/swaggo/swag/cmd/swag@latest
+
 COPY . .
+RUN swag init -g cmd/api/main.go -o api/docs
 RUN CGO_ENABLED=0 GOOS=linux go build -o /pulse ./cmd/api
 
-FROM alpine:3.19
-
-RUN apk --no-cache add ca-certificates tzdata
+FROM golang:1.25-alpine
 
 WORKDIR /app
 COPY --from=builder /pulse /app/pulse

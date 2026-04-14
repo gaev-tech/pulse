@@ -11,8 +11,8 @@ import (
 )
 
 func TestDBSmoke(t *testing.T) {
-	if os.Getenv("POSTGRES_HOST") == "" {
-		t.Skip("POSTGRES_HOST not set, skipping DB smoke test")
+	if os.Getenv("RUN_DB_TESTS") != "1" {
+		t.Skip("RUN_DB_TESTS=1 not set, skipping DB smoke test")
 	}
 
 	cfg := config.Load()

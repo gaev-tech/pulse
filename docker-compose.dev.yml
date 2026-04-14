@@ -44,6 +44,8 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile.dev
+      args:
+        NPM_REGISTRY: ${NPM_REGISTRY:-https://registry.npmjs.org}
     env_file: .env
     ports:
       - "5173:5173"
@@ -56,7 +58,7 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/conf.d/default.dev.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       - backend
       - frontend

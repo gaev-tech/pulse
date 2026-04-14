@@ -19,6 +19,14 @@ func NewAuthHandler(usecase *userusecase.UseCase) *AuthHandler {
 	return &AuthHandler{usecase: usecase}
 }
 
+// SendMagicLink godoc
+// @Summary     Отправить magic-link
+// @Tags        auth
+// @Accept      json
+// @Param       body body object{email=string} true "Email"
+// @Success     200
+// @Failure     400 {object} object{error=object{code=string,message=string}}
+// @Router      /v1/auth/magic-link [post]
 func (handler *AuthHandler) SendMagicLink(writer http.ResponseWriter, request *http.Request) {
 	var body struct {
 		Email string `json:"email"`
@@ -40,6 +48,16 @@ func (handler *AuthHandler) SendMagicLink(writer http.ResponseWriter, request *h
 	writer.WriteHeader(http.StatusOK)
 }
 
+// VerifyMagicLink godoc
+// @Summary     Верифицировать magic-link токен
+// @Tags        auth
+// @Accept      json
+// @Produce     json
+// @Param       body body object{token=string} true "Токен"
+// @Success     200 {object} object{access_token=string,refresh_token=string,user=object{id=string,email=string,username=string}}
+// @Failure     400 {object} object{error=object{code=string,message=string}}
+// @Failure     401 {object} object{error=object{code=string,message=string}}
+// @Router      /v1/auth/magic-link/verify [post]
 func (handler *AuthHandler) VerifyMagicLink(writer http.ResponseWriter, request *http.Request) {
 	var body struct {
 		Token string `json:"token"`
@@ -76,6 +94,16 @@ func (handler *AuthHandler) VerifyMagicLink(writer http.ResponseWriter, request 
 	})
 }
 
+// Refresh godoc
+// @Summary     Обновить токены
+// @Tags        auth
+// @Accept      json
+// @Produce     json
+// @Param       body body object{refresh_token=string} true "Refresh token"
+// @Success     200 {object} object{access_token=string,refresh_token=string}
+// @Failure     400 {object} object{error=object{code=string,message=string}}
+// @Failure     401 {object} object{error=object{code=string,message=string}}
+// @Router      /v1/auth/refresh [post]
 func (handler *AuthHandler) Refresh(writer http.ResponseWriter, request *http.Request) {
 	var body struct {
 		RefreshToken string `json:"refresh_token"`
@@ -107,6 +135,14 @@ func (handler *AuthHandler) Refresh(writer http.ResponseWriter, request *http.Re
 	})
 }
 
+// Logout godoc
+// @Summary     Выйти из системы
+// @Tags        auth
+// @Accept      json
+// @Param       body body object{refresh_token=string} true "Refresh token"
+// @Success     204
+// @Failure     400 {object} object{error=object{code=string,message=string}}
+// @Router      /v1/auth/logout [post]
 func (handler *AuthHandler) Logout(writer http.ResponseWriter, request *http.Request) {
 	var body struct {
 		RefreshToken string `json:"refresh_token"`
@@ -125,6 +161,14 @@ func (handler *AuthHandler) Logout(writer http.ResponseWriter, request *http.Req
 	writer.WriteHeader(http.StatusNoContent)
 }
 
+// Me godoc
+// @Summary     Текущий пользователь
+// @Tags        auth
+// @Produce     json
+// @Security    BearerAuth
+// @Success     200 {object} object{id=string,email=string,username=string}
+// @Failure     401 {object} object{error=object{code=string,message=string}}
+// @Router      /v1/auth/me [get]
 func (handler *AuthHandler) Me(writer http.ResponseWriter, request *http.Request) {
 	userID, ok := middleware.UserIDFromContext(request.Context())
 	if !ok {

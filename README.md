@@ -6,26 +6,29 @@
 
 | Команда | Описание |
 |---|---|
-| `make dev` | Полный стек в dev-режиме: бек, фронт, БД, Swagger UI |
-| `make prod` | Полный стек в prod-режиме |
+| `make dev` | Запустить dev-окружение (останавливает prod, если запущен) |
+| `make prod` | Запустить prod-окружение в фоне (выдаёт ошибку, если запущен dev) |
+| `make prod-down` | Остановить prod-окружение |
+| `make prod-down-v` | Остановить prod-окружение и удалить тома |
 
 ## Качество кода
 
 | Команда | Описание |
 |---|---|
-| `make lint` | Проверка код-стайла: golangci-lint (бек) + ESLint (фронт) |
+| `make lint` | Запустить линтеры (backend + frontend) |
 
 ## Тесты
 
 | Команда | Описание |
 |---|---|
-| `make test-api` | Все API-тесты (go test ./...) |
-| `make test-api t=TestName` | Один тест по имени |
-| `make test-e2e` | E2E-тесты Playwright с UI-режимом просмотра |
+| `make test-api` | Запустить API-тесты |
+| `make test-api t=TestName` | Запустить конкретный тест по имени |
+| `make test-e2e` | Запустить e2e-тесты локально |
+| `make test-e2e-ui` | Запустить e2e-тесты с UI Playwright |
 
 ## Прочее
 
 | Команда | Описание |
 |---|---|
-| `make swagger` | Сгенерировать OpenAPI spec из аннотаций (swag init) |
-| `make seed` | Заполнить БД тестовыми данными |
+| `make swagger` | Сгенерировать Swagger-документацию |
+| `make seed` | Заполнить базу тестовыми данными |

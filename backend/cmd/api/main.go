@@ -1,3 +1,13 @@
+// @title           Pulse API
+// @version         1.0
+// @description     Трекер личных и командных задач
+// @host            localhost
+// @BasePath        /api
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+
 package main
 
 import (
@@ -27,6 +37,8 @@ import (
 
 	"github.com/gaevivan/pulse/internal/repository/migrations"
 	userusecase "github.com/gaevivan/pulse/internal/usecase/user"
+
+	_ "github.com/gaevivan/pulse/api/docs"
 )
 
 func main() {

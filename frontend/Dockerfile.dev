@@ -1,10 +1,12 @@
 FROM node:20-alpine
 
+ARG NPM_REGISTRY=https://registry.npmjs.org
+
 WORKDIR /app
 
 COPY package.json ./
-RUN npm install
+RUN npm install --registry $NPM_REGISTRY
 
 EXPOSE 5173
 
-CMD ["npm", "run", "dev"]
+CMD ["sh", "-c", "npx svelte-kit sync && npm run dev"]

@@ -1,8 +1,9 @@
 [build]
+  pre_cmd = ["swag init -g cmd/api/main.go -o api/docs "]
   cmd = "go build -o ./tmp/main ./cmd/api"
   bin = "tmp/main"
   include_ext = ["go"]
-  exclude_dir = ["tmp", "tests", "api"]
+  exclude_dir = ["tmp", "tests", "api/docs"]
   delay = 1000
 
 [log]

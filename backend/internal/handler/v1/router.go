@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	httpSwagger "github.com/swaggo/http-swagger/v2"
 
 	authmiddleware "github.com/gaevivan/pulse/internal/handler/middleware"
 )
@@ -23,6 +24,9 @@ func NewRouter(deps Deps) http.Handler {
 	router.Use(middleware.Recoverer)
 
 	router.Get("/health", healthHandler)
+	router.Get("/swagger/*", httpSwagger.Handler(
+		httpSwagger.URL("/api/swagger/doc.json"),
+	))
 
 	router.Route("/v1", func(router chi.Router) {
 		router.Route("/auth", func(router chi.Router) {

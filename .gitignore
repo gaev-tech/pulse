@@ -4,6 +4,7 @@
 # Go
 backend/tmp/
 backend/vendor/
+backend/api/docs/
 
 # Node
 node_modules/
