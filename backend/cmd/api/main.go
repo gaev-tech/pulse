@@ -15,6 +15,7 @@ import (
 	"github.com/gaevivan/pulse/internal/infrastructure/logger"
 	"github.com/gaevivan/pulse/internal/infrastructure/postgres"
 	v1 "github.com/gaevivan/pulse/internal/handler/v1"
+	"github.com/gaevivan/pulse/internal/repository/migrations"
 )
 
 func main() {
@@ -26,6 +27,12 @@ func main() {
 		os.Exit(1)
 	}
 	defer func() { _ = log.Sync() }()
+
+	log.Info("running migrations...")
+	if err := postgres.Migrate(cfg.Database, migrations.FS); err != nil {
+		log.Fatal("failed to run migrations", zap.Error(err))
+	}
+	log.Info("migrations applied")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
