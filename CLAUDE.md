@@ -10,7 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 4. [Технологии и стек](docs/technologies.md)
 5. [Структура репозитория](docs/structure.md)
 6. [Make-команды](README.md)
-7. [Конвенции кода](docs/code-conventions.md)
+7. [Конвенции кода](CONTRIBUTING.md)
 8. [Схема базы данных](docs/db.md)
 9. [API](docs/api.md)
 10. [Автоматизации](docs/automations.md)
