@@ -81,10 +81,10 @@ func main() {
 	if cfg.Env != "production" {
 		log.Warn("non-production environment, using log sender (magic links printed to stdout)")
 		emailSender = email.NewLogSender(log)
-	} else if cfg.Resend.APIKey == "" {
-		log.Fatal("RESEND_API_KEY is required in production")
+	} else if cfg.Email.APIKey == "" {
+		log.Fatal("BREVO_API_KEY is required in production")
 	} else {
-		emailSender = email.NewResend(cfg.Resend.APIKey, cfg.Resend.FromEmail)
+		emailSender = email.NewBrevo(cfg.Email.APIKey, cfg.Email.FromEmail)
 	}
 
 	// UseCases
@@ -101,7 +101,7 @@ func main() {
 	authMW := authmiddleware.NewAuth(jwtManager, patRepo)
 
 	// Handlers
-	authHandler := v1.NewAuthHandler(userUseCase)
+	authHandler := v1.NewAuthHandler(userUseCase, log)
 
 	server := &http.Server{
 		Addr: ":" + cfg.Port,

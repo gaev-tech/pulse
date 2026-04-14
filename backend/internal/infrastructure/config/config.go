@@ -11,7 +11,7 @@ type Config struct {
 	Database    DatabaseConfig
 	JWT         JWTConfig
 	MinIO       MinIOConfig
-	Resend      ResendConfig
+	Email       EmailConfig
 }
 
 type DatabaseConfig struct {
@@ -34,7 +34,7 @@ type MinIOConfig struct {
 	UseSSL    bool
 }
 
-type ResendConfig struct {
+type EmailConfig struct {
 	APIKey    string
 	FromEmail string
 }
@@ -61,9 +61,9 @@ func Load() *Config {
 			Bucket:    getEnv("MINIO_BUCKET", "pulse"),
 			UseSSL:    getEnv("MINIO_USE_SSL", "false") == "true",
 		},
-		Resend: ResendConfig{
-			APIKey:    getEnv("RESEND_API_KEY", ""),
-			FromEmail: getEnv("RESEND_FROM_EMAIL", "noreply@pulse.app"),
+		Email: EmailConfig{
+			APIKey:    getEnv("BREVO_API_KEY", ""),
+			FromEmail: getEnv("EMAIL_FROM", ""),
 		},
 	}
 }
