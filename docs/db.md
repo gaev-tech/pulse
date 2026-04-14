@@ -130,6 +130,7 @@ CREATE TABLE tasks (
     created_by   UUID   NOT NULL REFERENCES users(id),
     created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+    origin_id    TEXT UNIQUE,
     UNIQUE (owner_type, owner_id, key_number)
 );
 
@@ -397,3 +398,28 @@ CREATE TABLE user_sidebar_team_states (
 ```
 
 Запись создаётся при первом изменении состояния. Если записи нет — считается `open = true`.
+
+---
+
+## imports
+
+```sql
+CREATE TABLE imports (
+    id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id             UUID NOT NULL REFERENCES users(id),
+    team_id             UUID REFERENCES teams(id),
+    source              TEXT NOT NULL,
+    status              TEXT NOT NULL DEFAULT 'in_progress',
+    progress_total      INT  NOT NULL DEFAULT 0,
+    progress_processed  INT  NOT NULL DEFAULT 0,
+    result              JSONB,
+    created_at          TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at          TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX ON imports (user_id);
+```
+
+- `source` — `csv`, `jira`, `github`
+- `status` — `in_progress`, `completed`
+- `result` — `{"imported": N, "updated": N, "errors": [{"origin_id": "...", "error": "..."}]}`

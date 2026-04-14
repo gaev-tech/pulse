@@ -14,3 +14,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 8. [Схема базы данных](docs/db.md)
 9. [API](docs/api.md)
 10. [Автоматизации](docs/automations.md)
+11. [API-тест-кейсы](docs/api-test-cases/)
+12. [E2E-тест-кейсы](docs/e2e-test-cases/)
+
+После изменения более приоритетных файлов документации необходимо актуализировать соответствующие тест-кейсы.

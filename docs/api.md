@@ -348,6 +348,46 @@ DELETE /api/v1/automations/{automationID}
 
 ---
 
+## Import
+
+```
+POST /api/v1/import/csv
+  Content-Type: multipart/form-data
+  Body: { file, team_id?, id_column }
+  Response: { import_id }
+  Auth: JWT / PAT
+  — запуск импорта из CSV; id_column — название колонки для origin_id;
+    CSV должен содержать колонки: title (обязательно), description, status,
+    assignee_email, labels (через запятую), parent (ссылка на id_column другой строки);
+    при team_id требуется право team.import
+
+POST /api/v1/import/jira
+  Body: { instance_url, project_key, api_token, email, team_id? }
+  Response: { import_id }
+  Auth: JWT / PAT
+  — запуск импорта из Jira; email + api_token для авторизации в Jira API;
+    при team_id требуется право team.import
+
+POST /api/v1/import/github
+  Body: { owner, repo, access_token, team_id? }
+  Response: { import_id }
+  Auth: JWT / PAT
+  — запуск импорта из GitHub; при team_id требуется право team.import
+
+GET /api/v1/import/{importID}
+  Response: { id, source, status, progress: { total, processed },
+              result: { imported, updated, errors: [{ origin_id, error }] } }
+  Auth: JWT / PAT
+  — текущее состояние импорта
+
+WebSocket /api/v1/ws/import/{importID}?token=
+  — сообщения { processed, total } по мере обработки;
+    финальное сообщение { status: "completed", imported, updated,
+    errors: [{ origin_id, error }] }
+```
+
+---
+
 ## Private Access Token
 
 ```
